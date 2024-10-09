@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify-like Music Player</title>
+   
+   
+</head>
+<style type="">
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.music-player {
+    width: 300px;
+    background-color: #1db954;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+}
+
+.current-song {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.current-song img {
+    width: 80px;
+    height: 80px;
+    border-radius: 5px;
+    margin-right: 20px;
+}
+
+.song-info h2, .song-info p {
+    margin: 0;
+}
+
+.controls {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 15px;
+}
+
+.controls button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #fff;
+}
+
+.progress-container {
+    margin-bottom: 10px;
+}
+
+.progress-container input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
+
+.volume-control {
+    margin-bottom: 15px;
+}
+
+.volume-control input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}
+
+.playlist {
+    text-align: left;
+    background-color: #333;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.playlist ul {
+    list-style: none;
+    padding: 0;
+}
+
+.playlist li {
+    padding: 5px;
+    cursor: pointer;
+}
+
+.playlist li:hover {
+    background-color: #444;
+}
+
+</style>
+
+<body>
+    <div class="music-player">
+        <div class="current-song">
+            <img id="cover" src="cover1.jpg" alt="Song Cover">
+            <div class="song-info">
+                <h2 id="title">Song Title</h2>
+                <p id="artist">Artist Name</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="prevBtn">⏮</button>
+            <button id="playBtn">⏯</button>
+            <button id="nextBtn">⏭</button>
+        </div>
+
+        <div class="progress-container">
+            <input type="range" id="progress" value="0" max="100">
+        </div>
+
+        <div class="volume-control">
+            <input type="range" id="volume" value="50" max="100">
+        </div>
+
+        <div class="playlist">
+            <ul id="playlist">
+                <li data-song="song1.mp3" data-cover="cover1.jpg" data-title="Song 1" data-artist="Artist 1">Song 1 - Artist 1</li>
+                <li data-song="song2.mp3" data-cover="cover2.jpg" data-title="Song 2" data-artist="Artist 2">Song 2 - Artist 2</li>
+                <li data-song="song3.mp3" data-cover="cover3.jpg" data-title="Song 3" data-artist="Artist 3">Song 3 - Artist 3</li>
+            </ul>
+        </div>
+    </div>
+
+    <audio id="audio"></audio>
+
+
+
+</body>
+<script type="">
+    const audio = document.getElementById('audio');
+const playBtn = document.getElementById('playBtn');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const progress = document.getElementById('progress');
+const volume = document.getElementById('volume');
+const cover = document.getElementById('cover');
+const title = document.getElementById('title');
+const artist = document.getElementById('artist');
+const playlist = document.getElementById('playlist').getElementsByTagName('li');
+
+let currentSongIndex = 0;
+let isPlaying = false;
+
+const songs = [
+    {
+        title: 'Song 1',
+        artist: 'Artist 1',
+        src: 'song1.mp3',
+        cover: 'cover1.jpg'
+    },
+    {
+        title: 'Song 2',
+        artist: 'Artist 2',
+        src: 'song2.mp3',
+        cover: 'cover2.jpg'
+    },
+    {
+        title: 'Song 3',
+        artist: 'Artist 3',
+        src: 'song3.mp3',
+        cover: 'cover3.jpg'
+    }
+];
+
+// Load song
+function loadSong(song) {
+    title.innerText = song.title;
+    artist.innerText = song.artist;
+    audio.src = song.src;
+    cover.src = song.cover;
+}
+
+// Play song
+function playSong() {
+    audio.play();
+    isPlaying = true;
+    playBtn.innerText = '⏸'; // Change play button to pause
+}
+
+// Pause song
+function pauseSong() {
+    audio.pause();
+    isPlaying = false;
+    playBtn.innerText = '⏯'; // Change pause button to play
+}
+
+// Toggle play/pause
+playBtn.addEventListener('click', () => {
+    if (isPlaying) {
+        pauseSong();
+    } else {
+        playSong();
+    }
+});
+
+// Update song progress
+audio.addEventListener('timeupdate', () => {
+    const progressPercent = (audio.currentTime / audio.duration) * 100;
+    progress.value = progressPercent;
+});
+
+// Seek through the song
+progress.addEventListener('input', () => {
+    const seekTime = (progress.value / 100) * audio.duration;
+    audio.currentTime = seekTime;
+});
+
+// Volume control
+volume.addEventListener('input', () => {
+    audio.volume = volume.value / 100;
+});
+
+// Load next song
+function nextSong() {
+    currentSongIndex = (currentSongIndex + 1) % songs.length;
+    loadSong(songs[currentSongIndex]);
+    playSong();
+}
+
+// Load previous song
+function prevSong() {
+    currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+    loadSong(songs[currentSongIndex]);
+    playSong();
+}
+
+nextBtn.addEventListener('click', nextSong);
+prevBtn.addEventListener('click', prevSong);
+
+// Load selected song from playlist
+for (let i = 0; i < playlist.length; i++) {
+    playlist[i].addEventListener('click', function() {
+        currentSongIndex = i;
+        loadSong(songs[currentSongIndex]);
+        playSong();
+    });
+}
+
+// Load the first song by default
+loadSong(songs[currentSongIndex]);
+
+</script>
+</html>
